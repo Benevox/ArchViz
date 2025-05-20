@@ -20,15 +20,21 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    // For client-side bundles, provide a mock for 'async_hooks'
+    // For client-side bundles, prevent 'async_hooks' from being bundled.
     // This prevents errors when Node.js specific modules are inadvertently pulled in.
     if (!isServer) {
-      config.resolve = config.resolve || {}; // Ensure resolve object exists
-      config.resolve.fallback = config.resolve.fallback || {}; // Ensure fallback object exists
-      
-      // Provide a path to an empty module for async_hooks
-      // The path is relative to the project root (context for webpack).
-      config.resolve.fallback.async_hooks = './src/lib/empty-module.js';
+      // Using 'externals' to treat 'async_hooks' as an external module
+      // that resolves to an empty object on the client-side.
+      // This effectively replaces require('async_hooks') with {}.
+      config.externals = {
+        ...(config.externals || {}),
+        'async_hooks': 'var {}',
+      };
+
+      // The previous 'resolve.fallback' approach:
+      // config.resolve = config.resolve || {}; 
+      // config.resolve.fallback = config.resolve.fallback || {}; 
+      // config.resolve.fallback.async_hooks = './src/lib/empty-module.js';
     }
     return config;
   },
