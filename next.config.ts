@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import path from 'path'; // Import the path module
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -26,7 +27,9 @@ const nextConfig: NextConfig = {
       config.resolve = config.resolve || {};
       config.resolve.fallback = {
         ...(config.resolve.fallback || {}),
-        async_hooks: false, // Explicitly prevent bundling of async_hooks on the client
+        // Point to the empty module using an absolute path
+        // This tells webpack to use an empty module for 'async_hooks' on the client-side
+        async_hooks: path.join(__dirname, 'src/lib/empty-module.js'),
       };
     }
     return config;
